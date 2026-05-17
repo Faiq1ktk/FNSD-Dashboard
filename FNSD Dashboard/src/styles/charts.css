@@ -1,0 +1,29 @@
+.chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.chart-sales-trend {
+  height: 165px;
+}
+
+.chart-category-sales {
+  height: 165px;
+}
+
+.chart-cost-variance {
+  height: 180px;
+}
+
+.chart-meal-production {
+  height: 120px;
+  margin-top: 14px;
+}
+
+.chart-outlet-revenue {
+  height: 230px;
+}
+
+canvas {
+  max-width: 100%;
+}

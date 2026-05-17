@@ -1,0 +1,349 @@
+.dash-table {
+  width: 100%;
+  font-size: 10px;
+  border-collapse: collapse;
+}
+
+.dash-table th {
+  background: #f5f7fa;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 10.5px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.dash-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #f0f2f5;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.dash-table tr:last-child td {
+  border-bottom: none;
+}
+
+.dash-table tr:hover td {
+  background: #f8f9fb;
+}
+
+.table-scroll-profitable {
+  max-height: 235px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ===== RECIPE COST SNAPSHOT ===== */
+
+.recipe-cost-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.recipe-col-name {
+  width: 20%;
+}
+
+.recipe-col-std {
+  width: 14%;
+}
+
+.recipe-col-actual {
+  width: 16%;
+}
+
+.recipe-col-var-rs {
+  width: 14%;
+}
+
+.recipe-col-var-percent {
+  width: 16%;
+}
+
+.recipe-col-status {
+  width: 20%;
+}
+
+.recipe-cost-table th {
+  background: #f5f7fa;
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  padding: 7px 6px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: normal;
+}
+
+.recipe-cost-table td {
+  font-size: 10px;
+  line-height: 1.35;
+  padding: 6px 6px;
+  border-bottom: 1px solid #f0f2f5;
+  vertical-align: middle;
+}
+
+.recipe-cost-table tbody tr {
+  height: 41px;
+}
+
+.recipe-item-name {
+  color: var(--text-dark);
+  white-space: normal !important;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.recipe-num-cell {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.recipe-status-cell {
+  text-align: left;
+  padding-right: 8px !important;
+  overflow: visible;
+}
+
+.table-note {
+  padding: 6px 10px;
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* ===== TEXT COLORS ===== */
+
+.text-up {
+  color: #2e7d32 !important;
+  font-weight: 600;
+}
+
+.text-down {
+  color: #c62828 !important;
+  font-weight: 600;
+}
+
+/* ===== STATUS BADGES ===== */
+
+.status-badge {
+  font-weight: 700;
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-size: 10.5px;
+  display: inline-block;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-align: center;
+  max-width: 56px;
+}
+
+.status-high {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.status-ok {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-slight {
+  background: #fff8e1;
+  color: #f57c00;
+  white-space: normal;
+  width: 50px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* ===== OUTLET SALES TABLE EXACT ORIGINAL STYLE ===== */
+
+.outlet-sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.outlet-sales-table th,
+.outlet-sales-table td {
+  padding: 6px 8px !important;
+  font-size: 10px;
+  border-bottom: 1px solid #f0f2f5;
+  vertical-align: middle;
+}
+
+.outlet-sales-table thead th {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.outlet-sales-table tbody tr {
+  height: 30px;
+}
+
+.outlet-main-head {
+  background: #f5f7fa !important;
+  color: var(--text-muted) !important;
+  text-align: left !important;
+  vertical-align: middle !important;
+  width: 120px;
+}
+
+.meal-head {
+  text-align: center !important;
+  font-weight: 700 !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+}
+
+.meal-sub {
+  text-align: center !important;
+  color: var(--text-muted) !important;
+  font-weight: 600 !important;
+}
+
+.breakfast-head,
+.breakfast-sub {
+  background: #e3f2fd !important;
+}
+
+.breakfast-head {
+  color: #1565c0 !important;
+}
+
+.lunch-head,
+.lunch-sub {
+  background: #f3e5f5 !important;
+}
+
+.lunch-head {
+  color: #7b1fa2 !important;
+}
+
+.dinner-head,
+.dinner-sub {
+  background: #fff3e0 !important;
+}
+
+.dinner-head {
+  color: #e65100 !important;
+}
+
+.total-head,
+.total-sub {
+  background: #e8f5e9 !important;
+}
+
+.total-head {
+  color: #2e7d32 !important;
+}
+
+.outlet-name-cell {
+  color: var(--text-dark);
+}
+
+.outlet-total-row td {
+  background: #f0f7ff !important;
+  font-weight: 700;
+}
+
+/* ===== TOP COST DRIVERS EXACT STYLE ===== */
+
+.top-cost-table {
+  width: 100%;
+  font-size: 10px;
+}
+
+.top-cost-table th {
+  background: #f5f7fa !important;
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 7px 8px !important;
+}
+
+.top-cost-table td {
+  padding: 6px 8px !important;
+  font-size: 10px;
+}
+
+.trend-cell {
+  text-align: center;
+}
+
+.trend-up {
+  color: #c62828 !important;
+  font-size: 12px;
+}
+
+.trend-down {
+  color: #2e7d32 !important;
+  font-size: 12px;
+}
+
+.trend-flat {
+  color: #f57c00 !important;
+  font-size: 12px;
+}
+
+/* ===== MOBILE TABLE FIX ===== */
+
+@media (max-width: 768px) {
+  .dash-table {
+    min-width: 620px;
+  }
+
+  .recipe-cost-table {
+    min-width: 620px;
+  }
+
+  .outlet-sales-table {
+    min-width: 760px;
+  }
+
+  .dash-card-body {
+    overflow-x: auto;
+  }
+}
+/* ===== STAFF PRODUCTIVITY TABLE ===== */
+
+.staff-table th,
+.staff-table td {
+  padding: 5px 8px !important;
+}
+
+.shift-badge {
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.shift-morning {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.shift-evening {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.shift-night {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.staff-total-row td {
+  background: #f0f7ff !important;
+  font-weight: 700;
+}

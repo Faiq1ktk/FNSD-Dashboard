@@ -1,0 +1,26 @@
+#main-wrap {
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.28s ease;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#main-wrap.expanded {
+  margin-left: var(--sidebar-collapsed);
+}
+
+#main-body {
+  padding: 16px 18px;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  #main-wrap {
+    margin-left: var(--sidebar-collapsed);
+  }
+
+  #main-body {
+    padding: 12px;
+  }
+}

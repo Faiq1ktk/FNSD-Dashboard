@@ -5,13 +5,51 @@ function getMainPayload(data) {
   return data?.user || data?.employee || data?.data || data?.result || data;
 }
 
+function getSiteKey(item, fallbackKey) {
+  return String(
+    item?.id ||
+      item?.siteId ||
+      item?.site_id ||
+      item?.SiteId ||
+      item?.SITE_ID ||
+      item?.key ||
+      fallbackKey
+  );
+}
+
+function getSiteValue(item) {
+  if (typeof item === "string") return item;
+
+  return (
+    item?.site ||
+    item?.siteName ||
+    item?.site_name ||
+    item?.SiteName ||
+    item?.SITE_NAME ||
+    item?.branch ||
+    item?.branchName ||
+    item?.location ||
+    item?.name ||
+    item?.title ||
+    ""
+  );
+}
+
+function cleanSite(site) {
+  return {
+    key: String(site?.key || "").trim(),
+    value: String(site?.value || "").trim(),
+  };
+}
+
 function removeDuplicateSites(sites) {
   const seen = new Set();
 
   return sites.filter((site) => {
-    const uniqueKey = `${site.key}-${site.value}`;
+    const clean = cleanSite(site);
+    const uniqueKey = `${clean.key}-${clean.value}`;
 
-    if (!site.value || seen.has(uniqueKey)) {
+    if (!clean.key || !clean.value || seen.has(uniqueKey)) {
       return false;
     }
 
@@ -25,39 +63,12 @@ function collectSitesFromValue(value) {
 
   if (Array.isArray(value)) {
     return value
-      .map((item, index) => {
-        if (typeof item === "string") {
-          return {
-            key: String(index + 1),
-            value: item,
-          };
-        }
-
-        return {
-          key: String(
-            item?.id ||
-              item?.siteId ||
-              item?.site_id ||
-              item?.SiteId ||
-              item?.SITE_ID ||
-              item?.key ||
-              index + 1
-          ),
-          value:
-            item?.site ||
-            item?.siteName ||
-            item?.site_name ||
-            item?.SiteName ||
-            item?.SITE_NAME ||
-            item?.branch ||
-            item?.branchName ||
-            item?.location ||
-            item?.name ||
-            item?.title ||
-            "",
-        };
-      })
-      .filter((site) => site.value);
+      .map((item, index) => ({
+        key: getSiteKey(item, index + 1),
+        value: getSiteValue(item),
+      }))
+      .map(cleanSite)
+      .filter((site) => site.key && site.value);
   }
 
   if (typeof value === "string") {
@@ -66,75 +77,30 @@ function collectSitesFromValue(value) {
         key: "1",
         value,
       },
-    ];
+    ].map(cleanSite);
   }
 
   if (typeof value === "object") {
-    const objectEntries = Object.entries(value);
-
-    // Converts object format like { 1: "Site Name" } into dropdown data
-    const objectSites = objectEntries
+    const objectSites = Object.entries(value)
       .map(([key, item]) => {
         if (typeof item === "string") {
           return {
-            key: String(key),
+            key,
             value: item,
           };
         }
 
         return {
-          key: String(
-            item?.id ||
-              item?.siteId ||
-              item?.site_id ||
-              item?.SiteId ||
-              item?.SITE_ID ||
-              key
-          ),
-          value:
-            item?.site ||
-            item?.siteName ||
-            item?.site_name ||
-            item?.SiteName ||
-            item?.SITE_NAME ||
-            item?.branch ||
-            item?.branchName ||
-            item?.location ||
-            item?.name ||
-            item?.title ||
-            "",
+          key: getSiteKey(item, key),
+          value: getSiteValue(item),
         };
       })
-      .filter((site) => site.value);
+      .map(cleanSite)
+      .filter((site) => site.key && site.value);
 
     if (objectSites.length > 0) {
       return objectSites;
     }
-
-    return [
-      {
-        key: String(
-          value?.id ||
-            value?.siteId ||
-            value?.site_id ||
-            value?.SiteId ||
-            value?.SITE_ID ||
-            1
-        ),
-        value:
-          value?.site ||
-          value?.siteName ||
-          value?.site_name ||
-          value?.SiteName ||
-          value?.SITE_NAME ||
-          value?.branch ||
-          value?.branchName ||
-          value?.location ||
-          value?.name ||
-          value?.title ||
-          "",
-      },
-    ].filter((site) => site.value);
   }
 
   return [];
@@ -175,12 +141,7 @@ function extractSites(data) {
 
   const collectedSites = possibleSiteValues.flatMap(collectSitesFromValue);
 
-  return removeDuplicateSites(
-    collectedSites.map((site) => ({
-      key: String(site.key || "").trim(),
-      value: String(site.value || "").trim(),
-    }))
-  );
+  return removeDuplicateSites(collectedSites.map(cleanSite));
 }
 
 function extractEmployee(data, employeeId) {
@@ -213,15 +174,17 @@ function extractEmployee(data, employeeId) {
 }
 
 function isApiNotFound(data) {
+  const message = data?.message?.toLowerCase?.() || "";
+
   return (
     data?.exists === false ||
     data?.success === false ||
     data?.isFound === false ||
     data?.found === false ||
     data?.status === false ||
-    data?.message?.toLowerCase?.().includes("not exist") ||
-    data?.message?.toLowerCase?.().includes("not found") ||
-    data?.message?.toLowerCase?.().includes("invalid")
+    message.includes("not exist") ||
+    message.includes("not found") ||
+    message.includes("invalid")
   );
 }
 
@@ -249,8 +212,6 @@ export async function fetchEmployeeAccess(employeeId) {
 
   const data = await response.json();
 
-  console.log("GET Site API response:", data);
-
   if (isApiNotFound(data)) {
     return {
       exists: false,
@@ -259,9 +220,6 @@ export async function fetchEmployeeAccess(employeeId) {
   }
 
   const employee = extractEmployee(data, employeeId);
-
-  console.log("Extracted employee:", employee);
-  console.log("API returned sites:", employee.sites);
 
   if (!employee.employeeId || employee.sites.length === 0) {
     return {

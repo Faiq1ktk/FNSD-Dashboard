@@ -11,7 +11,7 @@ function Login() {
   const navigate = useNavigate();
   const timerRef = useRef(null);
 
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, loading } = useAuth();
 
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
@@ -29,6 +29,12 @@ function Login() {
       navigate("/dashboard", { replace: true });
     }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(timerRef.current);
+    };
+  }, []);
 
   function showPopup(message = "Invalid user") {
     setPopupMessage(message);
@@ -72,7 +78,7 @@ function Login() {
       setSiteOptions(sites);
 
       // Auto-selects first site returned from GET API
-      setSelectedSite(sites[0].key);
+      setSelectedSite(String(sites[0].key));
     } catch (error) {
       showPopup(error.message || "Invalid user");
       resetEmployeeState();
@@ -109,6 +115,11 @@ function Login() {
       return;
     }
 
+    if (!password.trim()) {
+      showPopup("Please enter password");
+      return;
+    }
+
     if (!employeeFound || !selectedEmployee) {
       showPopup("Invalid user");
       return;
@@ -120,7 +131,7 @@ function Login() {
     }
 
     const selectedSiteObject = siteOptions.find(
-      (site) => site.key === selectedSite
+      (site) => String(site.key) === selectedSite
     );
 
     if (!selectedSiteObject) {
@@ -131,10 +142,10 @@ function Login() {
     try {
       const result = await login({
         employeeId: employeeId.trim(),
+        password: password.trim(),
         selectedSiteKey: selectedSiteObject.key,
         selectedSiteName: selectedSiteObject.value,
         selectedEmployee,
-        password,
       });
 
       if (!result.success) {
@@ -219,7 +230,7 @@ function Login() {
                 {siteOptions.length === 0 && <option value=""></option>}
 
                 {siteOptions.map((site) => (
-                  <option key={site.key} value={site.key}>
+                  <option key={site.key} value={String(site.key)}>
                     {site.value}
                   </option>
                 ))}
@@ -229,9 +240,17 @@ function Login() {
             <button
               type="submit"
               className="login-button-exact"
-              disabled={checkingEmployee}
+              disabled={checkingEmployee || loading}
             >
-              Login <i className="fa-solid fa-arrow-right-to-bracket"></i>
+              {loading ? (
+                <>
+                  Logging in <i className="fa-solid fa-spinner fa-spin"></i>
+                </>
+              ) : (
+                <>
+                  Login <i className="fa-solid fa-arrow-right-to-bracket"></i>
+                </>
+              )}
             </button>
           </form>
         </div>

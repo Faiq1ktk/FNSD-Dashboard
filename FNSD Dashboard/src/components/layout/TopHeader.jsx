@@ -1,4 +1,39 @@
+import { useEffect, useRef, useState } from "react";
+
+import useAuth from "../../hooks/useAuth";
+
 function TopHeader({ onToggleSidebar }) {
+  const { user, logout } = useAuth();
+
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const adminDropdownRef = useRef(null);
+
+  const employeeInitial = user?.employeeName
+    ? user.employeeName.charAt(0).toUpperCase()
+    : "A";
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        adminDropdownRef.current &&
+        !adminDropdownRef.current.contains(event.target)
+      ) {
+        setAdminMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  function handleLogout() {
+    setAdminMenuOpen(false);
+    logout();
+  }
+
   return (
     <header id="top-header">
       <button
@@ -15,61 +50,62 @@ function TopHeader({ onToggleSidebar }) {
       </div>
 
       <div className="header-right">
-
-         {/* 
-  TODO: Date Range Filter Integration
-  This dropdown will later control global dashboard time range:
-  Today, Yesterday, This Week, This Month.
-  Changing this value should refresh all dashboard APIs.
-*/} 
-
-
         <select className="header-select" defaultValue="Today">
           <option>Today</option>
           <option>Yesterday</option>
           <option>This Week</option>
           <option>This Month</option>
         </select>
-               
-        {/* 
-  TODO: Live Data Integration
-  This badge should later reflect real backend/live connection status.
-  Possible future options:
-  - WebSocket connected/disconnected
-  - API polling enabled/disabled
-  - Last successful refresh status
-*/}  
 
         <button type="button" className="live-badge">
           <span className="live-dot"></span>
           <span>Live Data</span>
           <i className="fa-solid fa-chevron-down live-chevron"></i>
         </button>
-        
-        {/* 
-  TODO: Notification API Integration
-  Notification count should later come from backend alerts API.
-  Example:
-  GET /api/dashboard/notifications/unread-count
-*/} 
+
         <button type="button" className="notif-btn" aria-label="Notifications">
           <i className="fa-solid fa-bell"></i>
           <span className="notif-badge">3</span>
         </button>
 
-        <div className="user-avatar">A</div>
-       {/* 
-  TODO: Admin/User API Integration
-  Admin name, role, permissions, and avatar should later come from authentication/user profile API.
-  Example:
-  GET /api/auth/me
-*/}
+        <div className="admin-dropdown-wrap" ref={adminDropdownRef}>
+          <button
+            type="button"
+            className="admin-dropdown-btn"
+            onClick={() => setAdminMenuOpen((prev) => !prev)}
+          >
+            <span className="admin-avatar">{employeeInitial}</span>
 
+            <span className="admin-name-text">
+              {user?.employeeName || "Admin"}
+            </span>
 
-        <button type="button" className="admin-btn">
-          <span>Admin</span>
-          <i className="fa-solid fa-chevron-down admin-chevron"></i>
-        </button>
+            <i className="fa-solid fa-chevron-down admin-chevron"></i>
+          </button>
+
+          {adminMenuOpen && (
+            <div className="admin-custom-menu">
+           <div className="admin-menu-user">
+  {/* Sequence: Name → Emp ID label only → Designation → Site */}
+  <strong>{user?.employeeName || "Admin User"}</strong>
+  <span>Emp ID: {user?.employeeId || "N/A"}</span>
+  <span>{user?.designation || "N/A"}</span>
+  <span>{user?.selectedSiteName || "N/A"}</span>
+</div>
+
+              <div className="admin-menu-divider"></div>
+
+              <button
+                type="button"
+                className="admin-logout-btn"
+                onClick={handleLogout}
+              >
+                <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

@@ -14,6 +14,7 @@ import "./styles/filterbar.css";
 import "./styles/cards.css";
 import "./styles/tables.css";
 import "./styles/charts.css";
+import "./styles/auth.css";
 
 import App from "./App.jsx";
 

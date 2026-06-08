@@ -146,6 +146,7 @@
   font-weight: 700;
 }
 
+/* Old class kept for safety if used anywhere else */
 .user-avatar {
   background: #1565c0;
   color: #ffffff;
@@ -160,6 +161,7 @@
   flex-shrink: 0;
 }
 
+/* Old class kept for safety if used anywhere else */
 .admin-btn {
   height: 32px;
   background: transparent;
@@ -177,6 +179,114 @@
   font-size: 9px;
 }
 
+/* ===== ADMIN DROPDOWN - CUSTOM REACT VERSION ===== */
+
+.admin-dropdown-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-dropdown-btn {
+  height: 36px;
+  background: transparent;
+  color: var(--text-dark);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  padding: 0 4px;
+  border-radius: 8px;
+  border: none;
+}
+
+.admin-dropdown-btn:hover {
+  background: #f0f2f5;
+}
+
+.admin-avatar {
+  width: 32px;
+  height: 32px;
+  background: #1565c0;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-name-text {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-custom-menu {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  width: 190px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+  z-index: 1200;
+}
+
+.admin-menu-user {
+  min-width: 170px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+.admin-menu-user strong {
+  color: var(--text-dark);
+  font-size: 12px;
+}
+
+.admin-menu-user span {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.admin-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 7px 0;
+}
+
+.admin-logout-btn {
+  width: 100%;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: #d32f2f;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.admin-logout-btn:hover {
+  background: #ffebee;
+}
+
+/* ===== RESPONSIVE ===== */
+
 @media (max-width: 768px) {
   #top-header {
     padding: 0 12px;
@@ -189,6 +299,10 @@
 
   .header-title h1 {
     font-size: 16px;
+  }
+
+  .admin-name-text {
+    display: none;
   }
 }
 

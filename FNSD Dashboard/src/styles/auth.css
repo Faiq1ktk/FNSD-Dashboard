@@ -1,0 +1,221 @@
+.login-page-exact {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  background-color: #ffffff;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.login-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.68);
+  z-index: 1;
+}
+
+.login-center-wrap {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card-exact {
+  width: 395px;
+  min-height: 412px;
+  background: #ffffff;
+  border-radius: 28px;
+  position: relative;
+  padding: 130px 10px 20px;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.18);
+}
+
+/* Logo image already contains hospital text */
+.login-logo-position {
+  position: absolute;
+  top: -48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 245px;
+  min-height: 150px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.login-logo-position img {
+  width: 300px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.login-form-exact {
+  width: 100%;
+  padding: 0;
+}
+
+.login-field-group {
+  margin-bottom: 17px;
+}
+
+.login-field-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  margin-left: 10px;
+  margin-bottom: 8px;
+}
+
+.login-field-group label b {
+  color: #ff0000;
+  font-weight: 700;
+}
+
+.login-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.login-input-exact {
+  width: 100%;
+  height: 40px;
+  border-radius: 20px;
+  border: 1px solid #c6d0dd;
+  background: #e7f0fb;
+  color: #111111;
+  font-size: 12px;
+  padding: 0 42px 0 13px;
+  outline: none;
+  box-shadow: none;
+}
+
+.login-input-exact:focus {
+  border-color: #2f62ad;
+  box-shadow: 0 0 0 2px rgba(47, 98, 173, 0.12);
+}
+
+/* Site dropdown arrow moved slightly left */
+.login-select-exact {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.5 1.5L7 7L12.5 1.5' stroke='%23222' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 24px center;
+  background-size: 14px 9px;
+}
+
+.login-select-exact:disabled {
+  background-color: #f4f6f8;
+  color: #777777;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.login-spinner {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: #2f62ad;
+}
+
+.login-button-exact {
+  width: 187px;
+  height: 32px;
+  border-radius: 18px;
+  background: #2f62ad;
+  color: #ffffff;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 7px auto 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.login-button-exact:hover,
+.login-button-exact:focus {
+  background: #2658a4;
+  color: #ffffff;
+}
+
+.login-button-exact:disabled {
+  background: #9db2d2;
+  color: #ffffff;
+  cursor: not-allowed;
+}
+
+.login-top-popup {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  min-width: 210px;
+  max-width: 320px;
+  min-height: 38px;
+  background: #fff2f0;
+  color: #cf1322;
+  border: 1px solid #ffccc7;
+  border-radius: 8px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  animation: popupDrop 0.25s ease;
+}
+
+@keyframes popupDrop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card-exact {
+    width: 92vw;
+    min-height: 400px;
+    border-radius: 24px;
+    padding: 122px 10px 20px;
+  }
+
+  .login-logo-position {
+    width: 220px;
+    top: -45px;
+  }
+
+  .login-logo-position img {
+    width: 220px;
+  }
+
+  .login-top-popup {
+    width: calc(100% - 32px);
+  }
+}

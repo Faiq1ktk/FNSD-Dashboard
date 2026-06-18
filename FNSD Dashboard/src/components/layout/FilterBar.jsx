@@ -1,8 +1,13 @@
-function FilterBar() {
+function FilterBar({
+  selectedDate,
+  onDateChange,
+  onApplyFilters,
+  applyingFilters = false,
+}) {
   return (
     <section id="filter-bar">
       <div className="filter-left-group">
-       {/* 
+        {/* 
   TODO: Backend Filter Integration
   These filter controls will later be connected with React state.
   Selected values will be sent as query parameters to dashboard APIs.
@@ -21,7 +26,12 @@ function FilterBar() {
           Filters:
         </span>
 
-        <input type="date" className="filter-date" defaultValue="2025-05-25" />
+        <input
+          type="date"
+          className="filter-date"
+          value={selectedDate}
+          onChange={(event) => onDateChange(event.target.value)}
+        />
 
         <select className="filter-select filter-outlet" defaultValue="All Outlets">
           <option>All Outlets</option>
@@ -60,15 +70,31 @@ function FilterBar() {
 
         {/* 
   TODO: Apply Filter Logic
-  On click, call backend APIs again using selected filter values.
-  Recommended future function:
-  handleApplyFilters()
+  Important:
+  Changing the date/filter value should NOT call any API.
+  API calls should happen only when the Apply button is clicked.
+
+  Current integrated API:
+  Get Revenue API for Total Sales KPI.
+
+  Future:
+  More KPI APIs will also be called from the same Apply button.
 */}
 
-        <button type="button" className="filter-btn filter-btn-primary">
-          <i className="fa-solid fa-magnifying-glass"></i>
+        <button
+          type="button"
+          className="filter-btn filter-btn-primary"
+          onClick={onApplyFilters}
+          disabled={applyingFilters}
+        >
+          <i
+            className={`fa-solid ${
+              applyingFilters ? "fa-spinner fa-spin" : "fa-magnifying-glass"
+            }`}
+          ></i>
           <span>Apply</span>
         </button>
+
         {/* 
   TODO: Reset Filter Logic
   On click, reset filters to default values and reload dashboard data.
@@ -81,7 +107,7 @@ function FilterBar() {
           <span>Reset</span>
         </button>
       </div>
-       
+
       {/* 
   TODO: Live Data Timestamp
   This timestamp should later come from backend API response.

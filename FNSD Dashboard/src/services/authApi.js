@@ -1,8 +1,14 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const AUTH_USER_API = `${API_BASE_URL}/auth/user`;
 
+const REQUEST_TIMEOUT_MS = 8000;
+
 function getMainPayload(data) {
   return data?.user || data?.employee || data?.data || data?.result || data;
+}
+
+function getApiMessage(data) {
+  return String(data?.message || data?.error || data?.msg || "").trim();
 }
 
 function getSiteKey(item, fallbackKey) {
@@ -173,63 +179,95 @@ function extractEmployee(data, employeeId) {
   };
 }
 
-function isApiNotFound(data) {
-  const message = data?.message?.toLowerCase?.() || "";
-
+function isApiMarkedAsFailed(data) {
   return (
     data?.exists === false ||
     data?.success === false ||
     data?.isFound === false ||
     data?.found === false ||
-    data?.status === false ||
-    message.includes("not exist") ||
-    message.includes("not found") ||
-    message.includes("invalid")
+    data?.status === false
   );
+}
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function readJsonSafely(response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchEmployeeAccess(employeeId) {
   const url = `${AUTH_USER_API}/${encodeURIComponent(employeeId)}`;
 
-  // Current GET API: Employee ID goes in URL and site/access comes back
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  try {
+    // Current GET API: Employee ID goes in URL and API response decides result/message
+    const response = await fetchWithTimeout(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  if (response.status === 404 || response.status === 401) {
+    const data = await readJsonSafely(response);
+    const apiMessage = getApiMessage(data);
+
+    if (!response.ok) {
+      return {
+        exists: false,
+        message: apiMessage || "Unable to process employee access request",
+      };
+    }
+
+    if (isApiMarkedAsFailed(data)) {
+      return {
+        exists: false,
+        message: apiMessage || "Unable to process employee access request",
+      };
+    }
+
+    const employee = extractEmployee(data, employeeId);
+
+    if (!employee.employeeId) {
+      return {
+        exists: false,
+        message: apiMessage || "Unable to process employee access request",
+      };
+    }
+
+    if (employee.sites.length === 0) {
+      return {
+        exists: false,
+        message: apiMessage || "No site access returned from API",
+      };
+    }
+
+    return {
+      exists: true,
+      employee,
+      message: apiMessage,
+    };
+  } catch {
     return {
       exists: false,
-      message: "Invalid user",
+      message: "Unable to connect to server",
     };
   }
-
-  if (!response.ok) {
-    throw new Error("Unable to check employee access");
-  }
-
-  const data = await response.json();
-
-  if (isApiNotFound(data)) {
-    return {
-      exists: false,
-      message: "Invalid user",
-    };
-  }
-
-  const employee = extractEmployee(data, employeeId);
-
-  if (!employee.employeeId || employee.sites.length === 0) {
-    return {
-      exists: false,
-      message: "Invalid user",
-    };
-  }
-
-  return {
-    exists: true,
-    employee,
-  };
 }

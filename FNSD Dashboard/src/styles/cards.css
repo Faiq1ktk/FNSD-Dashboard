@@ -31,6 +31,55 @@
   white-space: nowrap;
 }
 
+/* ===== KPI VALUE LOADING ANIMATION ===== */
+
+.kpi-value-loader {
+  width: 142px;
+  height: 27px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kpi-value-loader span {
+  height: 18px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.48);
+  animation: kpiValuePulse 0.85s ease-in-out infinite;
+}
+
+.kpi-value-loader span:nth-child(1) {
+  width: 42px;
+  animation-delay: 0s;
+}
+
+.kpi-value-loader span:nth-child(2) {
+  width: 58px;
+  animation-delay: 0.12s;
+}
+
+.kpi-value-loader span:nth-child(3) {
+  width: 28px;
+  animation-delay: 0.24s;
+}
+
+@keyframes kpiValuePulse {
+  0% {
+    opacity: 0.35;
+    transform: scaleY(0.88);
+  }
+
+  50% {
+    opacity: 0.95;
+    transform: scaleY(1);
+  }
+
+  100% {
+    opacity: 0.35;
+    transform: scaleY(0.88);
+  }
+}
+
 .kpi-sub {
   font-size: 11px;
   opacity: 0.92;
@@ -551,5 +600,14 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+}
+
+/* Accessibility: disable KPI loader animation for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .kpi-value-loader span {
+    animation: none;
+    opacity: 0.65;
+    transform: none;
   }
 }

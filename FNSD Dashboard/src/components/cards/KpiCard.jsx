@@ -1,6 +1,23 @@
+import { memo } from "react";
+
+import useAnimatedNumber from "../../hooks/useAnimatedNumber";
+
+function KpiValueLoader() {
+  return (
+    <span className="kpi-value-loader" aria-label="Loading KPI value">
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+  );
+}
+
 function KpiCard({ card }) {
   const isDown = card.comparisonDirection === "down";
   const hasComparison = Boolean(card.comparisonLabel && card.comparisonValue);
+
+  // Animated value works for current API KPI and future API KPI values
+  const animatedValue = useAnimatedNumber(card.value);
 
   return (
     <div className={`kpi-card ${card.bgClass}`}>
@@ -8,12 +25,15 @@ function KpiCard({ card }) {
 
       <i className={`${card.iconClass} kpi-icon`} aria-hidden="true"></i>
 
-      <div className="kpi-value">{card.value}</div>
+      <div className="kpi-value">
+        {card.loading ? <KpiValueLoader /> : animatedValue}
+      </div>
 
       <div className="kpi-sub">
         {hasComparison ? (
           <>
             <span>{card.comparisonLabel}</span>
+
             <span className={isDown ? "down" : "up"}>
               <i
                 className={`fa-solid ${
@@ -31,4 +51,4 @@ function KpiCard({ card }) {
   );
 }
 
-export default KpiCard;
+export default memo(KpiCard);

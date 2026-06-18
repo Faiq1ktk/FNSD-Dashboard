@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { sidebarMenuItems } from "../../data/sidebarData";
 
 function SidebarMenu({ activeMenu, onMenuSelect }) {
@@ -24,4 +26,4 @@ function SidebarMenu({ activeMenu, onMenuSelect }) {
   );
 }
 
-export default SidebarMenu;
+export default memo(SidebarMenu);

@@ -7,9 +7,17 @@ import { fetchEmployeeAccess } from "../services/authApi";
 import logo from "../assets/Loginpage/login-logo.png";
 import loginBg from "../assets/Loginpage/login-bg (1).png";
 
+const MAX_EMPLOYEE_ID_LENGTH = 8;
+const EMPLOYEE_CHECK_DELAY_MS = 700;
+const TOAST_HIDE_DELAY_MS = 2600;
+const SUCCESS_NAVIGATION_DELAY_MS = 500;
+
 function Login() {
   const navigate = useNavigate();
+
   const timerRef = useRef(null);
+  const toastTimerRef = useRef(null);
+  const requestIdRef = useRef(0);
 
   const { login, isAuthenticated, loading } = useAuth();
 
@@ -22,7 +30,10 @@ function Login() {
   const [siteOptions, setSiteOptions] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
-  const [popupMessage, setPopupMessage] = useState("");
+  const [toast, setToast] = useState({
+    message: "",
+    type: "error",
+  });
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -33,15 +44,37 @@ function Login() {
   useEffect(() => {
     return () => {
       clearTimeout(timerRef.current);
+      clearTimeout(toastTimerRef.current);
+      requestIdRef.current += 1;
     };
   }, []);
 
-  function showPopup(message = "Invalid user") {
-    setPopupMessage(message);
+  function showToast(message = "Unable to process request", type = "error") {
+    clearTimeout(toastTimerRef.current);
 
-    setTimeout(() => {
-      setPopupMessage("");
-    }, 2500);
+    setToast({
+      message,
+      type,
+    });
+
+    toastTimerRef.current = setTimeout(() => {
+      setToast({
+        message: "",
+        type: "error",
+      });
+    }, TOAST_HIDE_DELAY_MS);
+  }
+
+  function getToastIcon(type) {
+    if (type === "success") {
+      return "fa-solid fa-circle-check";
+    }
+
+    if (type === "warning") {
+      return "fa-solid fa-triangle-exclamation";
+    }
+
+    return "fa-solid fa-circle-exclamation";
   }
 
   function resetEmployeeState() {
@@ -51,15 +84,19 @@ function Login() {
     setSelectedSite("");
   }
 
-  async function checkEmployeeAccess(cleanEmployeeId) {
+  async function checkEmployeeAccess(cleanEmployeeId, requestId) {
     try {
       setCheckingEmployee(true);
 
-      // GET API checks Employee ID and returns allowed site/access
+      // GET API checks Employee ID and returns allowed site/access or API message
       const result = await fetchEmployeeAccess(cleanEmployeeId);
 
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
       if (!result.exists) {
-        showPopup("Invalid user");
+        showToast(result.message || "Unable to process request", "error");
         resetEmployeeState();
         return;
       }
@@ -68,7 +105,7 @@ function Login() {
       const sites = employee.sites || [];
 
       if (sites.length === 0) {
-        showPopup("Invalid user");
+        showToast(result.message || "No site access returned from API", "warning");
         resetEmployeeState();
         return;
       }
@@ -79,54 +116,64 @@ function Login() {
 
       // Auto-selects first site returned from GET API
       setSelectedSite(String(sites[0].key));
-    } catch (error) {
-      showPopup(error.message || "Invalid user");
-      resetEmployeeState();
+    } catch {
+      if (requestId === requestIdRef.current) {
+        showToast("Unable to connect to server", "error");
+        resetEmployeeState();
+      }
     } finally {
-      setCheckingEmployee(false);
+      if (requestId === requestIdRef.current) {
+        setCheckingEmployee(false);
+      }
     }
   }
 
   function handleEmployeeIdChange(event) {
-    const value = event.target.value;
+    const value = event.target.value
+      .replace(/\D/g, "")
+      .slice(0, MAX_EMPLOYEE_ID_LENGTH);
 
     setEmployeeId(value);
     resetEmployeeState();
 
+    requestIdRef.current += 1;
     clearTimeout(timerRef.current);
 
     const cleanEmployeeId = value.trim();
 
-    if (!cleanEmployeeId || cleanEmployeeId.length < 2) {
+    if (!cleanEmployeeId) {
+      setCheckingEmployee(false);
       return;
     }
 
+    const currentRequestId = requestIdRef.current;
+
     // Debounce prevents API call on every single key press
     timerRef.current = setTimeout(() => {
-      checkEmployeeAccess(cleanEmployeeId);
-    }, 700);
+      checkEmployeeAccess(cleanEmployeeId, currentRequestId);
+    }, EMPLOYEE_CHECK_DELAY_MS);
   }
 
   async function handleLogin(event) {
     event.preventDefault();
 
     if (!employeeId.trim()) {
-      showPopup("Please enter Emp ID");
+      showToast("Please enter Emp ID", "warning");
       return;
     }
 
     if (!password.trim()) {
-      showPopup("Please enter password");
+      showToast("Please enter password", "warning");
       return;
     }
 
     if (!employeeFound || !selectedEmployee) {
-      showPopup("Invalid user");
+      showToast("Please enter a valid Employee ID", "warning");
       return;
     }
 
     if (!selectedSite || siteOptions.length === 0) {
-      showPopup("Invalid user");
+      showToast("No site access returned from API", "warning");
       return;
     }
 
@@ -135,7 +182,7 @@ function Login() {
     );
 
     if (!selectedSiteObject) {
-      showPopup("Invalid user");
+      showToast("No site access returned from API", "warning");
       return;
     }
 
@@ -149,13 +196,17 @@ function Login() {
       });
 
       if (!result.success) {
-        showPopup(result.message || "Invalid user");
+        showToast(result.message || "Unable to login", "error");
         return;
       }
 
-      navigate("/dashboard", { replace: true });
-    } catch (error) {
-      showPopup(error.message || "Invalid user");
+      showToast(result.message || "Login successful", "success");
+
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, SUCCESS_NAVIGATION_DELAY_MS);
+    } catch {
+      showToast("Unable to connect to server", "error");
     }
   }
 
@@ -166,10 +217,10 @@ function Login() {
         backgroundImage: `url("${loginBg}")`,
       }}
     >
-      {popupMessage && (
-        <div className="login-top-popup">
-          <i className="fa-solid fa-circle-exclamation"></i>
-          <span>{popupMessage}</span>
+      {toast.message && (
+        <div className={`login-top-toast login-top-toast-${toast.type}`}>
+          <i className={getToastIcon(toast.type)}></i>
+          <span>{toast.message}</span>
         </div>
       )}
 
@@ -192,6 +243,8 @@ function Login() {
                   className="login-input-exact"
                   value={employeeId}
                   onChange={handleEmployeeIdChange}
+                  maxLength={MAX_EMPLOYEE_ID_LENGTH}
+                  inputMode="numeric"
                   autoFocus
                 />
 

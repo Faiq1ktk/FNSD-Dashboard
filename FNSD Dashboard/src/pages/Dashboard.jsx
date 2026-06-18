@@ -1,3 +1,14 @@
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import DashboardLayout from "../components/layout/DashboardLayout";
 
 import KpiCard from "../components/cards/KpiCard";
@@ -7,12 +18,6 @@ import CostAlertItem from "../components/cards/CostAlertItem";
 import InventorySummary from "../components/cards/InventorySummary";
 import ProductionWastage from "../components/cards/ProductionWastage";
 import MealShiftCard from "../components/cards/MealShiftCard";
-
-import SalesTrendChart from "../components/charts/SalesTrendChart";
-import CategorySalesChart from "../components/charts/CategorySalesChart";
-import CostVarianceChart from "../components/charts/CostVarianceChart";
-import MealProductionChart from "../components/charts/MealProductionChart";
-import OutletRevenueChart from "../components/charts/OutletRevenueChart";
 
 import ProfitableItemsTable from "../components/tables/ProfitableItemsTable";
 import RecipeCostTable from "../components/tables/RecipeCostTable";
@@ -24,10 +29,160 @@ import { kpiCards } from "../data/kpiData";
 import { notificationAlerts, costAlerts } from "../data/alertData";
 import { mealShiftCards } from "../data/mealData";
 
+import { selectAuthToken } from "../features/auth/authSlice";
+
+import {
+  fetchTotalMealCovers,
+  fetchTotalSales,
+  selectTotalMealCovers,
+  selectTotalMealCoversError,
+  selectTotalMealCoversLoading,
+  selectTotalSales,
+  selectTotalSalesError,
+  selectTotalSalesLoading,
+} from "../features/dashboard/dashboardKpiSlice";
+
+const SalesTrendChart = lazy(() =>
+  import("../components/charts/SalesTrendChart")
+);
+
+const CategorySalesChart = lazy(() =>
+  import("../components/charts/CategorySalesChart")
+);
+
+const CostVarianceChart = lazy(() =>
+  import("../components/charts/CostVarianceChart")
+);
+
+const MealProductionChart = lazy(() =>
+  import("../components/charts/MealProductionChart")
+);
+
+const OutletRevenueChart = lazy(() =>
+  import("../components/charts/OutletRevenueChart")
+);
+
+const DEFAULT_FILTER_DATE = "2025-06-01";
+
+function formatDateForApi(dateValue) {
+  if (!dateValue) return "";
+
+  const parts = dateValue.split("-");
+
+  if (parts.length !== 3) {
+    return dateValue;
+  }
+
+  const [year, month, day] = parts;
+
+  return `${day}-${month}-${year}`;
+}
+
+function ChartFallback() {
+  return <div className="chart-wrap">Loading chart...</div>;
+}
+
 function Dashboard() {
+  const dispatch = useDispatch();
+
+  const token = useSelector(selectAuthToken);
+
+  const totalSales = useSelector(selectTotalSales);
+  const totalSalesLoading = useSelector(selectTotalSalesLoading);
+  const totalSalesError = useSelector(selectTotalSalesError);
+
+  const totalMealCovers = useSelector(selectTotalMealCovers);
+  const totalMealCoversLoading = useSelector(selectTotalMealCoversLoading);
+  const totalMealCoversError = useSelector(selectTotalMealCoversError);
+
+  const [selectedDate, setSelectedDate] = useState(DEFAULT_FILTER_DATE);
+
+  const firstLoadDoneRef = useRef(false);
+
+  const loadDashboardKpis = useCallback(
+    ({ dateValue = selectedDate, force = false } = {}) => {
+      if (!token || !dateValue) return;
+
+      const apiDate = formatDateForApi(dateValue);
+
+      // For now, two KPI APIs are integrated.
+      // Future KPI APIs will be dispatched from this same function.
+      dispatch(fetchTotalSales({ date: apiDate, force }));
+      dispatch(fetchTotalMealCovers({ date: apiDate, force }));
+    },
+    [dispatch, selectedDate, token]
+  );
+
+  useEffect(() => {
+    if (!token || firstLoadDoneRef.current) return;
+
+    firstLoadDoneRef.current = true;
+
+    // Initial dashboard load only. Date change will NOT call API.
+    loadDashboardKpis({
+      dateValue: DEFAULT_FILTER_DATE,
+    });
+  }, [loadDashboardKpis, token]);
+
+  const handleDateChange = useCallback((dateValue) => {
+    // Only update selected date. Do not call API here.
+    setSelectedDate(dateValue);
+  }, []);
+
+  const handleApplyFilters = useCallback(() => {
+    // API calls happen only when Apply button is clicked.
+    loadDashboardKpis({
+      force: true,
+    });
+  }, [loadDashboardKpis]);
+
+  const applyingFilters = totalSalesLoading || totalMealCoversLoading;
+
+  const dashboardKpiCards = useMemo(() => {
+    return kpiCards.map((card) => {
+      if (card.id === 1) {
+        return {
+          ...card,
+          value: totalSalesError ? "—" : totalSales.value,
+          comparisonLabel: totalSales.comparisonLabel,
+          comparisonValue: totalSales.comparisonValue,
+          comparisonDirection: totalSales.comparisonDirection,
+          loading: totalSalesLoading,
+        };
+      }
+
+      if (card.id === 2) {
+        return {
+          ...card,
+          value: totalMealCoversError ? "—" : totalMealCovers.value,
+          comparisonLabel: totalMealCovers.comparisonLabel,
+          comparisonValue: totalMealCovers.comparisonValue,
+          comparisonDirection: totalMealCovers.comparisonDirection,
+          loading: totalMealCoversLoading,
+        };
+      }
+
+      return card;
+    });
+  }, [
+    totalMealCovers,
+    totalMealCoversError,
+    totalMealCoversLoading,
+    totalSales,
+    totalSalesError,
+    totalSalesLoading,
+  ]);
+
   return (
-    <DashboardLayout>
-        {/* 
+    <DashboardLayout
+      filterBarProps={{
+        selectedDate,
+        onDateChange: handleDateChange,
+        onApplyFilters: handleApplyFilters,
+        applyingFilters,
+      }}
+    >
+      {/* 
   TODO: Backend Dashboard Data Loading
   In production, this page should fetch all dashboard data from backend APIs.
   Recommended approach:
@@ -41,16 +196,14 @@ function Dashboard() {
   src/services/dashboardApi.js
 */}
 
-
-
       <div className="row g-2 section-gap">
-       {/* 
+        {/* 
   TODO: Replace kpiCards static array with backend KPI response.
   Keep KpiCard component reusable.
   Only change data source, not UI structure.
 */}
 
-        {kpiCards.map((card) => (
+        {dashboardKpiCards.map((card) => (
           <div key={card.id} className="col-xl-2 col-lg-4 col-md-6 col-sm-6">
             <KpiCard card={card} />
           </div>
@@ -65,13 +218,15 @@ function Dashboard() {
             iconColorClass="text-primary"
             badge="Daily"
           >
-          {/* 
+            {/* 
   TODO: Pass backend sales trend data here.
   Future example:
   <SalesTrendChart data={dashboardData.salesTrend} />
 */}
 
-            <SalesTrendChart />
+            <Suspense fallback={<ChartFallback />}>
+              <SalesTrendChart />
+            </Suspense>
           </DashboardCard>
         </div>
 
@@ -80,15 +235,16 @@ function Dashboard() {
             title="Category Wise Sales Distribution"
             iconClass="fa-solid fa-chart-pie"
             iconColorClass="text-warning"
-          > 
-          {/* 
+          >
+            {/* 
   TODO: Pass backend category-wise sales data here.
   Future example:
   <CategorySalesChart data={dashboardData.categorySales} />
 */}
 
-
-            <CategorySalesChart />
+            <Suspense fallback={<ChartFallback />}>
+              <CategorySalesChart />
+            </Suspense>
           </DashboardCard>
         </div>
 
@@ -105,8 +261,6 @@ function Dashboard() {
   Future example:
   <ProfitableItemsTable items={dashboardData.profitableItems} />
 */}
-
-
 
             <ProfitableItemsTable />
           </DashboardCard>
@@ -151,14 +305,15 @@ function Dashboard() {
             iconColorClass="text-primary"
             badge="Variance %"
           >
-
-          {/* 
+            {/* 
   TODO: Pass backend standard vs actual cost variance data here.
   Future example:
   <CostVarianceChart data={dashboardData.costVariance} />
 */}
 
-            <CostVarianceChart />
+            <Suspense fallback={<ChartFallback />}>
+              <CostVarianceChart />
+            </Suspense>
           </DashboardCard>
         </div>
 
@@ -247,7 +402,9 @@ function Dashboard() {
               ))}
             </div>
 
-            <MealProductionChart />
+            <Suspense fallback={<ChartFallback />}>
+              <MealProductionChart />
+            </Suspense>
           </DashboardCard>
         </div>
 
@@ -258,13 +415,14 @@ function Dashboard() {
             iconColorClass="text-info"
             badge="Today"
           >
-            <OutletRevenueChart />
+            <Suspense fallback={<ChartFallback />}>
+              <OutletRevenueChart />
+            </Suspense>
           </DashboardCard>
         </div>
       </div>
 
-
-        {/* 
+      {/* 
   TODO: Footer Live Status
   Footer note and Live Data status should later reflect backend refresh status.
   Example:

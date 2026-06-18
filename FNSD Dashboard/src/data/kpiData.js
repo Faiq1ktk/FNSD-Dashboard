@@ -1,4 +1,3 @@
-
 // TODO: Backend API Integration
 // This static KPI data will later be replaced with real dashboard KPI data from backend APIs.
 // Expected API example:
@@ -12,14 +11,13 @@
 // In production, move this data into an API service file such as:
 // src/services/dashboardApi.js
 
-
 export const kpiCards = [
   {
     id: 1,
     label: "TOTAL SALES (TODAY)",
-    value: "Rs. 8,75,340",
-    comparisonLabel: "vs Yesterday",
-    comparisonValue: "12.5%",
+    value: "",
+    comparisonLabel: "",
+    comparisonValue: "",
     comparisonDirection: "up",
     iconClass: "fa-solid fa-chart-bar",
     bgClass: "bg-kpi-green",
@@ -27,9 +25,9 @@ export const kpiCards = [
   {
     id: 2,
     label: "TOTAL MEAL COVERS",
-    value: "5,482",
-    comparisonLabel: "vs Yesterday",
-    comparisonValue: "8.3%",
+    value: "",
+    comparisonLabel: "",
+    comparisonValue: "",
     comparisonDirection: "up",
     iconClass: "fa-solid fa-users",
     bgClass: "bg-kpi-blue",

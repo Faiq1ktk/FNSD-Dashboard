@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import SidebarLogo from "./SidebarLogo";
 import SidebarMenu from "./SidebarMenu";
 import WorkflowSteps from "./WorkflowSteps";
@@ -15,4 +17,4 @@ function Sidebar({ collapsed, activeMenu, onMenuSelect }) {
   );
 }
 
-export default Sidebar;
+export default memo(Sidebar);

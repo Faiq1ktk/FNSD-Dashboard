@@ -1,7 +1,8 @@
+import { memo } from "react";
+
 // Reusable Wrapper Component
 // This card is used across the dashboard for charts, tables, alerts, and summaries.
 // Keep this component generic so backend-driven sections can reuse the same layout.
-
 
 function DashboardCard({
   title,
@@ -26,4 +27,4 @@ function DashboardCard({
   );
 }
 
-export default DashboardCard;
+export default memo(DashboardCard);

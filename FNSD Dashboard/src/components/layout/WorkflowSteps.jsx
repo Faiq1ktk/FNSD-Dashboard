@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { workflowSteps } from "../../data/workflowData";
 
 function WorkflowSteps() {
@@ -36,4 +38,4 @@ function WorkflowSteps() {
   );
 }
 
-export default WorkflowSteps;
+export default memo(WorkflowSteps);
